@@ -1,0 +1,4 @@
+appdirs==1.4.4
+liftover==1.3.2
+FreeSimpleGUI==5.1.1
+PyYAML==6.0.2
