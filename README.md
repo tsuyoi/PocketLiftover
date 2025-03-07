@@ -56,7 +56,7 @@ Search patterns use Python regular expressions (regex) to extract genomic coordi
 
 #### Example Search Patterns:
 - Generic `(?P<chrom>((?:chr)?[0-9xXyY]+))(?::(?P<start>[0-9]+))(?:-(?P<end>[0-9]+))?`
-- ChAS `(?P<chrom>\w+)(?:p|q).*\((?P<start>[0-9]+)_(?P<end>[0-9]+).*`
+- ChAS `(?P<chrom>\w+)(?:p|q).*\((?P<start>[0-9]+)_?(?P<end>[0-9]*).*`
 
 #### Adding Search Patterns
 To add a pattern, open `File` -> `Preferences`, navigate to the `Search Patterns` tab, and click `Add Search Pattern`:

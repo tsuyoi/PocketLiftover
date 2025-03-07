@@ -1,4 +1,5 @@
 import re
+import webbrowser
 
 import FreeSimpleGUI as Sg
 
@@ -40,7 +41,9 @@ def main_window():
         ], [
             Sg.Text(' ', size=(1, 1)), Sg.Text('', key='LIFTOVERRESULTS')
         ], [
-            Sg.Button('Copy to Clipboard', key='-CLIPBOARD-'),
+            Sg.Button('Copy to Clipboard', key='-CLIPBOARD-', disabled=True),
+            Sg.Button('Open in IGV', key='-OPENINIGV-', disabled=True),
+        ], [
             Sg.Checkbox('Automatically copy to clipboard on liftover', default=automatically_copy_to_clipboard,
                         enable_events=True, key='-AUTOCLIPBOARD-'),
         ]
@@ -74,8 +77,11 @@ def main_window():
         if event == '-AUTOCLIPBOARD-':
             Config.set_automatically_copy_to_clipboard(values['-AUTOCLIPBOARD-'])
         if event == '-LIFTOVER-' or event == 'LIFTOVERTEXT' + '_Enter':
-            automatically_copy_to_clipboard = values['-AUTOCLIPBOARD-']
+            window.Element('-CLIPBOARD-').Update(disabled=True)
+            window.Element('-OPENINIGV-').Update(disabled=True)
             window.Element('LIFTOVERPARAMS').Update("Liftover Results (None):")
+            window.Element('LIFTOVERRESULTS').Update('')
+            automatically_copy_to_clipboard = values['-AUTOCLIPBOARD-']
             chainfile_label = values['CHAINFILE']
             if chainfile_label is None or chainfile_label == '':
                 Sg.popup_error('Please add a valid chainfile', title='No Valid Chainfile')
@@ -108,10 +114,12 @@ def main_window():
                     except IndexError:
                         pass
             if source is None:
-                Sg.popup_error(f"Failed to find coordinates in [{liftover_text}] using any existing patterns")
+                Sg.popup_error(f"Failed to find coordinates in [{liftover_text}] using any existing patterns",
+                               title='No Matching Pattern')
                 continue
             if chrom is None or start is None:
-                Sg.popup_error("Pattern must use ?P<chrom>, ?P<start>, and ?P<end> for successful capture")
+                Sg.popup_error(f"Pattern {source} must use ?P<chrom>, ?P<start>, and ?P<end> for " +
+                               "successful capture", title='Invalid Pattern')
                 continue
             try:
                 lifted_beginning = lifter.liftover_coordinate(chrom, start)
@@ -146,9 +154,14 @@ def main_window():
                 f"Liftover Results ({chrom}:{start}{f'-{end}' if end else ''}) " +
                 f"({chainfile.source_type} => {chainfile.destination_type} - {source}):")
             window.Element('LIFTOVERRESULTS').Update(liftover_result)
+            window.Element('-CLIPBOARD-').Update(disabled=False)
+            window.Element('-OPENINIGV-').Update(disabled=False)
             window.Element('LIFTOVERTEXT').Update('')
         if event == '-CLIPBOARD-':
             Sg.clipboard_set(window.Element('LIFTOVERRESULTS').get())
+            window.Element('LIFTOVERTEXT').set_focus(True)
+        if event == '-OPENINIGV-':
+            webbrowser.open(f"http://localhost:60151/goto?locus={window.Element('LIFTOVERRESULTS').get()}")
             window.Element('LIFTOVERTEXT').set_focus(True)
         window.Refresh()
     window.close()
