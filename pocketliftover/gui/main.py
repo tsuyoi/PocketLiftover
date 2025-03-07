@@ -2,7 +2,8 @@ import re
 
 import FreeSimpleGUI as Sg
 
-from pocketliftover.application import Config, Lifter, ensure_chr_prefix, toggle_chr_prefix
+from pocketliftover.application import Config, Lifter
+from pocketliftover.application import ensure_chr_prefix, toggle_chr_prefix, get_chainfile_type_label
 
 from .icon import get_gui_icon
 from .preferences import preferences_window
@@ -30,8 +31,7 @@ def main_window():
             Sg.Text('Liftover Chain:'),
             Sg.Combo(chains, key='CHAINFILE', enable_events=True,
                      default_value=default_chainfile.label if default_chainfile else None),
-            Sg.Text(f'({default_chainfile.source_type} => {default_chainfile.destination_type})',
-                    key='CHAINFILE_TYPES'),
+            Sg.Text(get_chainfile_type_label(), key='CHAINFILE_TYPES'),
         ], [
             Sg.Text('Text with Coordinate(s):'),
             Sg.Input(key='LIFTOVERTEXT', focus=True), Sg.Button('Liftover', key='-LIFTOVER-')
@@ -66,13 +66,11 @@ def main_window():
                 window['CHAINFILE'].Update(set_to_index=reset_index)
                 Config.set_default_chainfile(existing_selection)
             else:
-                default_chainfile = None
-                window.Element('CHAINFILE_TYPES').Update(f'()')
+                window.Element('CHAINFILE_TYPES').Update(get_chainfile_type_label())
         if event == 'CHAINFILE':
             Config.set_default_chainfile(values['CHAINFILE'])
             default_chainfile = Config.get_default_chainfile()
-            window.Element('CHAINFILE_TYPES').Update(f'({default_chainfile.source_type} => ' +
-                                                     f'{default_chainfile.destination_type})')
+            window.Element('CHAINFILE_TYPES').Update(get_chainfile_type_label())
         if event == '-AUTOCLIPBOARD-':
             Config.set_automatically_copy_to_clipboard(values['-AUTOCLIPBOARD-'])
         if event == '-LIFTOVER-' or event == 'LIFTOVERTEXT' + '_Enter':
