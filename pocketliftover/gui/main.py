@@ -89,7 +89,6 @@ def main_window():
                                                          "re-add the correct chainfile")
                 continue
             source = None
-            ref = None
             chrom = None
             start = None
             end = None
@@ -140,7 +139,7 @@ def main_window():
                         continue
             # Remove chr prefix from reported hg19 coordinates
             lifted_chrom = ensure_chr_prefix(lifted_chrom, chainfile.destination_type != 'hg19')
-            liftover_result = f"{lifted_chrom}:{lifted_start}{f':{lifted_end}' if end else ''}"
+            liftover_result = f"{lifted_chrom}:{lifted_start}{f'-{lifted_end}' if end else ''}"
             if automatically_copy_to_clipboard:
                 Sg.clipboard_set(liftover_result)
             window.Element('LIFTOVERPARAMS').Update(

@@ -16,7 +16,11 @@ button. You'll be presented with the results of the liftover and provided an out
 `[chr]{chrom}:{start}[-{end}]` (e.g. `chr1:10000000` or `1:10000000-10000020`). The `chr` prefix is removed from all
 coordinates lifted to `hg19` and added to all others.
 
+#### Single locus lookup result:
 ![Main Window - Results](.github/MainWindow-Results.png)
+
+#### Loci range lookup result:
+![Main Window - Results 2](.github/MainWindow-Results2.png)
 
 The results line will include the original coordinate(s) as well as the reference genomes and the matching pattern label.
 
@@ -52,7 +56,7 @@ Search patterns use Python regular expressions (regex) to extract genomic coordi
 
 #### Example Search Patterns:
 - Generic `(?P<chrom>((?:chr)?[0-9xXyY]+))(?::(?P<start>[0-9]+))(?:-(?P<end>[0-9]+))?`
-- ChAS `arr\[(?P<ref>.*)\]\s(?P<chrom>\w+)(?:p|q).*\((?P<start>[0-9]+)_(?P<end>[0-9]+).*`
+- ChAS `(?P<chrom>\w+)(?:p|q).*\((?P<start>[0-9]+)_(?P<end>[0-9]+).*`
 
 #### Adding Search Patterns
 To add a pattern, open `File` -> `Preferences`, navigate to the `Search Patterns` tab, and click `Add Search Pattern`:
