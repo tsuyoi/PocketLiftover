@@ -60,8 +60,19 @@ class PatternConfig(object):
 class Config(object):
     config_file = Dirs.get_app_path('config.yml')
     default_chainfile = None
+    automatically_copy_to_clipboard = False
     chainfiles = []
     patterns = []
+
+    @staticmethod
+    def get_automatically_copy_to_clipboard():
+        return Config.automatically_copy_to_clipboard
+
+    @staticmethod
+    def set_automatically_copy_to_clipboard(value: bool):
+        print(f"set_automatically_copy_to_clipboard: {value}")
+        Config.automatically_copy_to_clipboard = value
+        Config.save_config()
 
     @staticmethod
     def get_default_chainfile():
@@ -158,6 +169,7 @@ class Config(object):
             {
                 'chainfiles': [c.yamlfy() for c in Config.chainfiles],
                 'default_chainfile': Config.default_chainfile,
+                'automatically_copy_to_clipboard': Config.automatically_copy_to_clipboard,
                 'patterns': [p.yamlfy() for p in Config.patterns],
             },
             open(Config.config_file, 'w'),
@@ -177,6 +189,8 @@ class Config(object):
                                                       chainfile['destination_type'], chainfile['file'])
             if 'default_chainfile' in conf:
                 Config.default_chainfile = conf['default_chainfile']
+            if 'automatically_copy_to_clipboard' in conf:
+                Config.automatically_copy_to_clipboard = conf['automatically_copy_to_clipboard']
             if 'patterns' in conf:
                 for pattern in conf['patterns']:
                     Config.load_pattern(pattern['label'], pattern['pattern'])

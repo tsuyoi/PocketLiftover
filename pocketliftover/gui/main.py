@@ -11,6 +11,7 @@ from .preferences import preferences_window
 def main_window():
     chains = Config.get_chainfiles()
     default_chainfile = Config.get_default_chainfile()
+    automatically_copy_to_clipboard = Config.get_automatically_copy_to_clipboard()
     menu = [
         [
             '&File',
@@ -29,6 +30,8 @@ def main_window():
             Sg.Text('Liftover Chain:'),
             Sg.Combo(chains, key='CHAINFILE', enable_events=True,
                      default_value=default_chainfile.label if default_chainfile else None),
+            Sg.Text(f'({default_chainfile.source_type} => {default_chainfile.destination_type})',
+                    key='CHAINFILE_TYPES'),
         ], [
             Sg.Text('Text with Coordinate(s):'),
             Sg.Input(key='LIFTOVERTEXT', focus=True), Sg.Button('Liftover', key='-LIFTOVER-')
@@ -38,6 +41,8 @@ def main_window():
             Sg.Text(' ', size=(1, 1)), Sg.Text('', key='LIFTOVERRESULTS')
         ], [
             Sg.Button('Copy to Clipboard', key='-CLIPBOARD-'),
+            Sg.Checkbox('Automatically copy to clipboard on liftover', default=automatically_copy_to_clipboard,
+                        enable_events=True, key='-AUTOCLIPBOARD-'),
         ]
     ]
 
@@ -60,9 +65,18 @@ def main_window():
             if reset_index > -1:
                 window['CHAINFILE'].Update(set_to_index=reset_index)
                 Config.set_default_chainfile(existing_selection)
+            else:
+                default_chainfile = None
+                window.Element('CHAINFILE_TYPES').Update(f'()')
         if event == 'CHAINFILE':
             Config.set_default_chainfile(values['CHAINFILE'])
+            default_chainfile = Config.get_default_chainfile()
+            window.Element('CHAINFILE_TYPES').Update(f'({default_chainfile.source_type} => ' +
+                                                     f'{default_chainfile.destination_type})')
+        if event == '-AUTOCLIPBOARD-':
+            Config.set_automatically_copy_to_clipboard(values['-AUTOCLIPBOARD-'])
         if event == '-LIFTOVER-' or event == 'LIFTOVERTEXT' + '_Enter':
+            automatically_copy_to_clipboard = values['-AUTOCLIPBOARD-']
             window.Element('LIFTOVERPARAMS').Update("Liftover Results (None):")
             chainfile_label = values['CHAINFILE']
             if chainfile_label is None or chainfile_label == '':
@@ -129,6 +143,8 @@ def main_window():
             # Remove chr prefix from reported hg19 coordinates
             lifted_chrom = ensure_chr_prefix(lifted_chrom, chainfile.destination_type != 'hg19')
             liftover_result = f"{lifted_chrom}:{lifted_start}{f':{lifted_end}' if end else ''}"
+            if automatically_copy_to_clipboard:
+                Sg.clipboard_set(liftover_result)
             window.Element('LIFTOVERPARAMS').Update(
                 f"Liftover Results ({chrom}:{start}{f'-{end}' if end else ''}) " +
                 f"({chainfile.source_type} => {chainfile.destination_type} - {source}):")
